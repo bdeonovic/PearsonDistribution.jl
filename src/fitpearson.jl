@@ -1,4 +1,4 @@
-function fitpearson(mu1::T, mu2::T, beta1::T, beta2::T) where T <: Real
+function fitpearson(mu1::T, mu2::T, beta1::T, beta2::T, atol::T=sqrt(eps())) where T <: Real
   if beta1 > (beta2 - 1)
     error("There are no probability distributions with these moments")
   elseif isapprox(beta1, (beta2 -1))
@@ -11,8 +11,8 @@ function fitpearson(mu1::T, mu2::T, beta1::T, beta2::T) where T <: Real
     b1 = sqrt(mu2) * sqrt(beta1) * (beta2 + 3) / (10*beta2 - 12*beta1 - 18)
     b2 = (2*beta2 - 3*beta1 - 6) / (10*beta2 - 12*beta1 - 18)
 
-    if isapprox(beta1, 0.0, rtol=0.0, atol=sqrt(eps()))
-      if isapprox(beta2, 3.0, rtol=0.0, atol=sqrt(eps())) #Type 0
+    if isapprox(beta1, 0.0, rtol=0.0, atol=atol)
+      if isapprox(beta2, 3.0, rtol=0.0, atol=atol) #Type 0
         return Normal(mu1, sqrt(mu2))
       elseif beta2 < 3 #Type II
         a1 = sqrt(mu2) / 2 * (-sqrt(-16 * beta2 * (2 * beta2 - 6)) / (2 * beta2 - 6))    
@@ -23,7 +23,7 @@ function fitpearson(mu1::T, mu2::T, beta1::T, beta2::T) where T <: Real
         a = sqrt(mu2 * (r-1))
         return PearsonVII(1 + r, mu1, a / sqrt(1 + r))
       end
-    elseif !isapprox((2*beta2 - 3*beta1 - 6), 0.0, rtol=0.0, atol=sqrt(eps()))
+    elseif !isapprox((2*beta2 - 3*beta1 - 6), 0.0, rtol=0.0, atol=atol)
       k = 0.25 * beta1 * (beta2 + 3)^2 / ((4*beta2 - 3*beta1) * (2*beta2 - 3*beta1 - 6))
       if k < 0 #Type I
         a1 = sqrt(mu2) / 2 * ((-sqrt(beta1) * (beta2 + 3) - sqrt(beta1 * (beta2 + 3) ^ 2 - 4 * (4*beta2 - 3*beta1) * (2*beta2-3*beta1-6))) / (2*beta2-3*beta1-6))
@@ -39,7 +39,7 @@ function fitpearson(mu1::T, mu2::T, beta1::T, beta2::T) where T <: Real
         (sqrt(beta1 * (beta2 + 3)^2 -4*(4*beta2 - 3*beta1)*(2*beta2 - 3*beta1-6)))
         lambda = mu1 - (a2-a1) * (1+m1) / (m1+m2+2)
         return PearsonI(1+m1, 1+m2, lambda, a2-a1)
-      elseif isapprox(k, 1.0, rtol=0.0, atol=sqrt(eps())) #Type V
+      elseif isapprox(k, 1.0, rtol=0.0, atol=atol) #Type V
         return PearsonV(1/b2-1, mu1 - b1/(2*b2), -(b1-b1/(2*b2)) / b2) 
       elseif k > 1 #Type VI
         a1 = sqrt(mu2)/2*((-sqrt(beta1)*(beta2+3)-sqrt(beta1*(beta2+3)^2-4*(4*beta2-3*beta1)*
